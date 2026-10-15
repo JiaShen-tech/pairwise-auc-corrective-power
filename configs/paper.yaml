@@ -1,0 +1,242 @@
+paper:
+  title: "Pairwise AUC Optimization Needs Corrective Power: A Unified View"
+  seeds: [123, 124, 125, 126, 127]
+  losses: [square, hinge, exponential, logistic, squared_hinge]
+  grids:
+    cv:
+      warmup_ratio: [0, 0.01, 0.025, 0.03, 0.05, 0.075, 0.10, 0.15, 0.20, 0.25, 0.30]
+      margin: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    distilbert:
+      warmup_ratio: [0, 0.01, 0.025, 0.05, 0.075, 0.10, 0.15, 0.20, 0.25, 0.30]
+      margin: [0.1, 0.2, 0.4, 0.6, 0.7]
+    qwen:
+      warmup_ratio: [0, 0.02, 0.04, 0.06, 0.08, 0.10]
+      margin: [0.1, 0.2, 0.4, 0.6]
+  deep_auc_experiments:
+    - cv_apple_densenet121
+    - cv_rice_densenet121
+    - cv_aptos_densenet121
+    - cv_ham10000_densenet121
+    - cv_imagenet_lt_dogs_resnet50
+    - cv_dogs_resnet50
+    - cv_aircraft_resnet50
+    - cv_aptos_resnet50
+    - cv_deepweeds_resnet50
+    - nlp_goemotions_annoyance_distilbert
+    - nlp_goemotions_fear_distilbert
+    - nlp_anli_r1_ent_neu_distilbert
+    - nlp_anli_r3_con_neu_distilbert
+    - nlp_anli_r3_ent_neu_distilbert
+    - nlp_snli_high_overlap_distilbert
+    - nlp_wanli_con_neu_distilbert
+    - nlp_wanli_ent_neu_distilbert
+  deep_auc:
+    lr: 0.05
+    momentum: 0.9
+    epoch_decay: 0.002
+    weight_decay: 0.00001
+    clip_value: 1.0
+    mode: sgd
+    margin: 1.0
+  mechanism:
+    severe_thresholds: [0, 0.01, 0.025, 0.05, 0.075, 0.1, 0.15, 0.2]
+    variance_batch_sizes: [4, 8, 16, 32, 64]
+    variance_repetitions: 5000
+    intervention:
+      imagenet_lt_dogs: {start_update: 690, learning_rate: 0.025, magnitude: 0.05, updates: 207, seeds: [20262000, 20262015]}
+      aptos: {start_update: 110, learning_rate: 0.00005, magnitude: 0.01, updates: 66, seeds: [20263000, 20263023]}
+
+defaults:
+  common:
+    loss: squared_hinge
+    margin: 1.0
+    warmup_ratio: 0.0
+    switch_lr_scale: 0.5
+    positive_fraction: 0.25
+    gradient_accumulation: 1
+    max_grad_norm: 0.0
+    num_workers: 4
+  cv_imagenet:
+    modality: image
+    task_type: binary
+    model: resnet50
+    pretrained: true
+    image_size: 224
+    epochs: 20
+    batch_size: 128
+    eval_batch_size: 256
+    optimizer: sgd
+    lr: 0.05
+    momentum: 0.9
+    weight_decay: 0.0001
+    switch_lr_scale: 1.0
+  cv_resnet:
+    modality: image
+    task_type: binary
+    model: resnet50
+    pretrained: true
+    image_size: 224
+    epochs: 10
+    eval_batch_size: 128
+    optimizer: adamw
+    lr: 0.0001
+    weight_decay: 0.0001
+  cv_densenet:
+    modality: image
+    task_type: binary
+    model: densenet121
+    pretrained: true
+    image_size: 224
+    epochs: 10
+    batch_size: 48
+    eval_batch_size: 128
+    optimizer: adamw
+    lr: 0.0001
+    weight_decay: 0.0001
+  distilbert:
+    modality: text
+    task_type: binary
+    model: distilbert-base-uncased
+    dtype: float32
+    epochs: 4
+    batch_size: 32
+    eval_batch_size: 64
+    optimizer: adamw
+    lr: 0.0002
+    weight_decay: 0.01
+    scheduler_warmup_fraction: 0.05
+    max_length: 128
+    max_grad_norm: 1.0
+    lora_rank: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: [q_lin, k_lin, v_lin, out_lin, lin1, lin2]
+  qwen:
+    modality: text
+    task_type: binary
+    model: Qwen/Qwen2.5-1.5B-Instruct
+    dtype: bfloat16
+    epochs: 4
+    batch_size: 24
+    eval_batch_size: 48
+    optimizer: adamw
+    lr: 0.00008
+    weight_decay: 0.01
+    scheduler_warmup_fraction: 0.05
+    max_length: 256
+    max_grad_norm: 1.0
+    lora_rank: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+  small_multiclass:
+    modality: image
+    task_type: multiclass
+    model: resnet18
+    pretrained: false
+    image_size: 64
+    transform_style: simple
+    epochs: 10
+    batch_size: 64
+    eval_batch_size: 128
+    per_class: 4
+    steps_per_epoch: 24
+    optimizer: adamw
+    lr: 0.002
+    weight_decay: 0.0001
+  multilabel:
+    modality: image
+    task_type: multilabel
+    model: densenet121
+    pretrained: true
+    image_size: 224
+    transform_style: medical
+    epochs: 8
+    batch_size: 64
+    eval_batch_size: 128
+    optimizer: adamw
+    lr: 0.0001
+    weight_decay: 0.0001
+  large_multiclass:
+    modality: image
+    task_type: multiclass
+    model: resnet50
+    pretrained: true
+    image_size: 128
+    transform_style: large
+    batch_size: 128
+    eval_batch_size: 256
+    optimizer: sgd
+    lr: 0.01
+    backbone_lr_multiplier: 0.1
+    momentum: 0.9
+    weight_decay: 0.0001
+    feature_bank: true
+    bank_per_class: 8
+    pair_classes_per_step: 32
+    positives_per_class: 8
+    negatives_per_class: 64
+
+experiments:
+  cv_imagenet_lt_dogs_resnet50: {profile: cv_imagenet, source: ImageNet-LT, construction: "tail dog classes vs sibling dog classes"}
+  cv_dogs_resnet50: {profile: cv_resnet, source: Stanford Dogs, construction: "Spitz/husky/malamute vs Eskimo dog/Samoyed"}
+  cv_aircraft_resnet50: {profile: cv_resnet, source: FGVC-Aircraft, construction: "CRJ700 vs CRJ900"}
+  cv_aptos_resnet50: {profile: cv_resnet, source: APTOS 2019, construction: "severe-or-worse vs moderate"}
+  cv_deepweeds_resnet50: {profile: cv_resnet, source: DeepWeeds, construction: "Parthenium vs Siam weed"}
+  cv_apple_densenet121: {profile: cv_densenet, source: D-KAP, construction: "apple scab vs apple rot"}
+  cv_rice_densenet121: {profile: cv_densenet, source: Rice Leaf Diseases, construction: "brown spot vs leaf smut"}
+  cv_aptos_densenet121: {profile: cv_densenet, source: APTOS 2019, construction: "severe-or-worse vs moderate"}
+  cv_ham10000_densenet121: {profile: cv_densenet, source: HAM10000, construction: "melanoma vs melanocytic nevus"}
+
+  nlp_goemotions_annoyance_distilbert: {profile: distilbert, source: GoEmotions, construction: "annoyance vs rest"}
+  nlp_goemotions_fear_distilbert: {profile: distilbert, source: GoEmotions, construction: "fear vs rest"}
+  nlp_anli_r1_ent_neu_distilbert: {profile: distilbert, source: ANLI, construction: "round 1 entailment vs neutral"}
+  nlp_anli_r3_con_neu_distilbert: {profile: distilbert, source: ANLI, construction: "round 3 contradiction vs neutral"}
+  nlp_anli_r3_ent_neu_distilbert: {profile: distilbert, source: ANLI, construction: "round 3 entailment vs neutral"}
+  nlp_snli_high_overlap_distilbert: {profile: distilbert, source: SNLI, construction: "high-overlap entailment vs neutral"}
+  nlp_wanli_con_neu_distilbert: {profile: distilbert, source: WANLI, construction: "contradiction vs neutral"}
+  nlp_wanli_ent_neu_distilbert: {profile: distilbert, source: WANLI, construction: "entailment vs neutral"}
+
+  nlp_goemotions_annoyance_qwen: {profile: qwen, source: GoEmotions, construction: "annoyance vs rest"}
+  nlp_goemotions_fear_qwen: {profile: qwen, source: GoEmotions, construction: "fear vs rest"}
+  nlp_anli_r1_ent_neu_qwen: {profile: qwen, source: ANLI, construction: "round 1 entailment vs neutral"}
+  nlp_anli_r3_con_neu_qwen: {profile: qwen, source: ANLI, construction: "round 3 contradiction vs neutral"}
+  nlp_anli_r3_ent_neu_qwen: {profile: qwen, source: ANLI, construction: "round 3 entailment vs neutral"}
+  nlp_snli_high_overlap_qwen: {profile: qwen, source: SNLI, construction: "high-overlap entailment vs neutral"}
+  nlp_wanli_con_neu_qwen: {profile: qwen, source: WANLI, construction: "contradiction vs neutral"}
+  nlp_wanli_ent_neu_qwen: {profile: qwen, source: WANLI, construction: "entailment vs neutral"}
+
+  multiclass_aircraft_airbus6: {profile: small_multiclass, source: FGVC-Aircraft, num_classes: 6}
+  multiclass_cifar100_mammals5: {profile: small_multiclass, source: CIFAR-100, num_classes: 5}
+  multiclass_cifar100_vehicles10: {profile: small_multiclass, source: CIFAR-100, num_classes: 10}
+
+  multilabel_chexpert_competition5:
+    profile: multilabel
+    source: CheXpert
+    label_columns: [Cardiomegaly, Edema, Consolidation, Atelectasis, Pleural_Effusion]
+  multilabel_chexpert_cardiac_fluid4:
+    profile: multilabel
+    source: CheXpert
+    label_columns: [Cardiomegaly, Edema, Atelectasis, Pleural_Effusion]
+  multilabel_chexpert_consolidation_cardiac2:
+    profile: multilabel
+    source: CheXpert
+    label_columns: [Consolidation, Cardiomegaly]
+
+  multiclass_inaturalist2018:
+    profile: large_multiclass
+    source: iNaturalist 2018
+    num_classes: 8142
+    reported_seeds: [123]
+    epochs: 3
+    eval_batch_size: 128
+    fixed_budget_test: true
+  multiclass_imagenet_lt:
+    profile: large_multiclass
+    source: ImageNet-LT
+    num_classes: 1000
+    reported_seeds: [123]
+    epochs: 4
+    pretrained: false
+    weight_path: places365_resnet50.pth
+

@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "corrective-auc"
+version = "0.1.0"
+description = "Experiments for Pairwise AUC Optimization Needs Corrective Power: A Unified View"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = {file = "LICENSE"}
+dependencies = [
+  "numpy==2.1.2",
+  "pandas==2.3.3",
+  "PyYAML>=6.0,<7",
+  "scikit-learn==1.7.2",
+  "torch==2.6.0",
+  "torchvision==0.21.0",
+  "Pillow>=10,<12",
+]
+
+[project.optional-dependencies]
+nlp = [
+  "transformers==4.51.3",
+  "peft>=0.15,<0.16",
+]
+deepauc = ["libauc==1.3.0"]
+test = ["pytest>=8,<9"]
+
+[project.scripts]
+auc-train = "corrective_auc.train:main"
+auc-simulate = "corrective_auc.simulations:main"
+auc-report = "corrective_auc.report:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
