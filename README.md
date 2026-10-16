@@ -2,6 +2,8 @@
 
 [Chinese](README_zh.md)
 
+[Paper](https://arxiv.org/abs/2610.21743) | [PDF](https://arxiv.org/pdf/2610.21743)
+
 Code and configurations for the experiments in the paper.
 
 ## Installation
@@ -101,4 +103,15 @@ auc-simulate --kind all --output outputs/simulations
 ```bash
 pip install -e ".[test]"
 pytest
+```
+
+## Citation
+
+```bibtex
+@article{chen2026pairwise,
+  title={Pairwise AUC Optimization Needs Corrective Power: A Unified View},
+  author={Chen, Jia and Yang, Zhiyong and Bao, Shilong and Xu, Qianqian and Huang, Qingming},
+  journal={arXiv preprint arXiv:2610.21743},
+  year={2026}
+}
 ```
